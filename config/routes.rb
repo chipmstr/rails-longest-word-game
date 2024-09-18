@@ -1,10 +1,13 @@
 Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+  # route for displaying the letter grid (new game)
+  get 'games/new', to: 'games#new'
 
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
+  # route for submitting and processing the word (score calculation)
+  post 'games/score', to: 'games#score'
+
+  # existing route for health check
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Defines the root path route ("/")
-  # root "posts#index"
+  # setting the root route to the games#new action
+  root to: 'games#new'
 end

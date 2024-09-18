@@ -1,0 +1,31 @@
+<h1 class="text-start">New game</h1>
+
+<div class="letter-grid d-flex justify-content-start">
+  <% @letters.each do |letter| %>
+    <!-- each letter is wrapped in a div to style it as a box -->
+    <div class="letter-box mx-1">
+      <%= letter %>
+    </div>
+  <% end %>
+</div>
+
+<!-- form to submit the word -->
+<form action="/games/score" method="post" data-turbo="false" class="text-start mt-4">
+  <!-- adds an authenticity token to ensure the form is secure -->
+  <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+
+  <!-- passes the grid of letters as a hidden field so we can use it in the controller -->
+  <%= hidden_field_tag :grid, @letters.join(" ") %>
+
+  <!-- form group wrapping label and input/button row -->
+  <div class="mb-3" style="max-width: 400px;">
+    <!-- label aligned with the input -->
+    <label for="word" class="form-label" style="text-align: left; display: block;">What is the longest word you can find?</label>
+
+    <!-- input field and submit button in the same row -->
+    <div class="d-flex">
+      <input type="text" name="word" id="word" class="form-control me-2" style="height: 40px; width: 100%;">
+      <button type="submit" class="btn btn-outline-primary" style="height: 40px;">Play</button>
+    </div>
+  </div>
+</form>
