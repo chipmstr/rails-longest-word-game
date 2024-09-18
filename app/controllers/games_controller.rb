@@ -1,7 +1,16 @@
+require 'httparty'
+
 class GamesController < ApplicationController
+  # action to render the grid with random letters for a new game
   def new
-    # generate a random grid with 10 letters
+    # generate a random grid of 10 letters
     @letters = Array.new(10) { ('A'..'Z').to_a.sample }
+
+    # store the start time in the session as a serialized string
+    session[:start_time] = Time.now.to_s
+
+    # initialize the total score if not already present
+    session[:total_score] ||= 0
   end
 
   def score
@@ -11,17 +20,23 @@ class GamesController < ApplicationController
     # retrieve the letters grid from the form
     @grid = params[:grid].split
 
-    # initialize session score if it doesn't exist
-    session[:total_score] ||= 0
+    # retrieve and deserializethe start time from the session
+    start_time = Time.parse(session[:start_time])
+
+    # calculate time taken to submit the word
+    time_taken = Time.now - start_time
 
     # check if the word is valid in the grid and in the dictionary
     if valid_word_in_grid?(@word, @grid) && valid_word_in_api?(@word)
-      @result = "<strong>Congratulations!</strong> #{@word.upcase} is a valid english word!"
+      # calculate score based on word length and the time taken
+      score = calculate_score(@word, time_taken)
 
-      # add the word length to the session total score
-      session[:total_score] += @word.length
+      # add score to total score in the session
+      session[:total_score] += score
+
+      @result = "<strong>Congratulations!</strong> #{@word.upcase} is a valid English word!"
     elsif !valid_word_in_grid?(@word, @grid)
-      # format the grid letters into uppercase and seperate them with commas
+      # format the grid letters into uppercase and separate them with commas
       formatted_grid = @grid.map(&:upcase).join(", ")
       @result = "Sorry, <strong>#{@word.upcase}</strong> can't be built out of #{formatted_grid}"
     else
@@ -49,5 +64,10 @@ class GamesController < ApplicationController
       Rails.logger.error "Error fetching word from API: #{e.message}"
       false
     end
+  end
+
+  # method to calculate the score based on word length and time taken
+  def calculate_score(word, time_taken)
+    (word.length.to_f / time_taken).round(2)
   end
 end
